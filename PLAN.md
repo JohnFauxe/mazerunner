@@ -217,7 +217,7 @@ benchmarks/configs/*.toml  ──►  Matrix expander  ──►  Runner  ──
 ### 5.1 Tracing
 Algorithms don't draw. They emit small events into a `Tracer` (`core/trace.py`):
 
-- Generation: `carve`, `uncarve`, `wall`, `current`, `frontier_add/remove`, `walk`, `erase` (Wilson's loop erasure), `set_merge`, `phase`
+- Generation: `open_all` (wall-adders start fully open), `carve`, `uncarve`, `wall`, `current`, `frontier_add/remove`, `walk`, `erase` (Wilson's loop erasure), `set_merge`, `phase`
 - Solving: `visit`, `frontier_add/remove`, `current`, `move` (agents), `mark` (Trémaux), `fill`, `path`
 
 `Maze.link()` emits `carve` automatically and the agent `Probe` emits `move`
@@ -231,7 +231,7 @@ will check that the no-op tracer adds only negligible time.
 
 ### 5.2 Trace format (`.trace.jsonl`)
 ```
-{"type":"header","version":1,"topology":"polar","args":[25],"seed":…,
+{"type":"header","version":1,"topology":{"name":"polar","args":[25]},"seed":…,
  "generator":"wilson","solver":"astar","start":12,"goal":907,
  "geometry":{"cells":[…polygons or arcs…]}}
 [0,"carve",[0,1]]
@@ -289,9 +289,9 @@ mazerunner/
 | Phase | Deliverable | Exit criteria |
 |-------|-------------|---------------|
 | **0 — Skeleton** *(done)* | Package layout, ABCs, registry, trait model, stubs, CLI `list` | `uv run mazerunner list` shows every algorithm and its phase |
-| **1 — Square MVP** | SquareGrid; DFS, Binary Tree, Sidewinder, Aldous–Broder, Wilson's; BFS, DFS, Dijkstra, A*, wall follower, random mouse; endpoint placements (opposite-sides, corners, random, manual, diameter); ASCII render; trace recording; terminal replay; validation; basic runner | Benchmark a 4×4 to 200×200 matrix end-to-end; all mazes validate; property tests pass |
-| **2 — Round & Hex** | PolarGrid, HexGrid; SVG renderer; **web viewer: replay + live + race mode**; `center-out` placement; Hunt-and-Kill, Prim's, Kruskal's, Growing Tree; Greedy, Bidirectional BFS, dead-end filling, Trémaux | Same benchmark suite runs on all three topologies |
-| **3 — Analysis** | Texture metrics, uniformity test, Eller's, Recursive Division, IDA*, Pledge; **results dashboard in the viewer** (click a trial to replay it) | Report compares generators by texture and solvers by cost |
+| **1 — Square MVP** *(done)* | SquareGrid; DFS, Binary Tree, Sidewinder, Aldous–Broder, Wilson's; BFS, DFS, Dijkstra, A*, wall follower, random mouse; endpoint placements (opposite-sides, corners, random, manual, diameter); ASCII render; trace recording; terminal replay; validation; basic runner | Benchmark a 4×4 to 200×200 matrix end-to-end; all mazes validate; property tests pass |
+| **2 — Round & Hex** *(done)* | PolarGrid, HexGrid; SVG renderer; **web viewer: replay + live + race mode**; `center-out` placement; Hunt-and-Kill, Prim's, Kruskal's, Growing Tree; Greedy, Bidirectional BFS, dead-end filling, Trémaux | Same benchmark suite runs on all three topologies |
+| **3 — Analysis** *(done)* | Texture metrics, uniformity test, Eller's, Recursive Division, IDA*, Pledge; **results dashboard in the viewer** (click a trial to replay it) | Report compares generators by texture and solvers by cost |
 | **4 — Extensions** | **Weighted mazes**; placeholders → real: triangle, upsilon, weave, 3D, masks, braiding, CA, JPS, chain, animation, optional Rust/numba fast paths | Driven by interest |
 
 ---

@@ -1,21 +1,27 @@
-"""Binary Tree. Each cell links north or east at random.
+"""Binary Tree: for every cell, carve north or east (random), if they exist.
 
 Reference: Buck, MfP ch.2. Notes: docs/algorithms/generation.md
-Status: placeholder (phase MVP).
 """
 import random
 
 from mazerunner.core.maze import Maze
 from mazerunner.core.registry import Phase, generators
-from mazerunner.core.traits import Trait  # noqa: F401
+from mazerunner.core.traits import Trait
 from mazerunner.generators.base import Generator
 
 
 @generators.register(
     "binary-tree", title="Binary Tree", requires=(Trait.ORTHOGONAL,), phase=Phase.MVP,
-    tags=('stateless',), reference="Buck, MfP ch.2",
+    implemented=True, tags=('stateless',), reference="Buck, MfP ch.2",
 )
 class BinaryTree(Generator):
 
     def carve(self, maze: Maze, rng: random.Random) -> None:
-        raise NotImplementedError("binary-tree: phase MVP")
+        topo = maze.topology
+        tr = self.tracer
+        for cell in topo.cell_list:
+            if tr.enabled:
+                tr.emit("current", cell)
+            options = [n for d in ("N", "E") if (n := topo.axis_neighbor(cell, d)) is not None]
+            if options:
+                maze.link(cell, options[rng.randrange(len(options))])

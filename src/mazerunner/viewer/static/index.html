@@ -3,24 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>MazeRunner Viewer</title>
-<style>
-  :root { --bg:#fafaf8; --fg:#1d1d1b; --muted:#6b6b66; }
-  @media (prefers-color-scheme: dark) { :root { --bg:#161615; --fg:#ecebe6; --muted:#9a9993; } }
-  body { margin:0; padding:16px; font:15px/1.5 system-ui, sans-serif; background:var(--bg); color:var(--fg); }
-  .muted { color:var(--muted); }
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<h1>MazeRunner Viewer</h1>
-<p class="muted">Placeholder (phase 2). Planned layout:</p>
-<ul>
-  <li><b>Canvas</b>: draws cells from <code>header.geometry</code> (square, polar arcs, hex, …) and applies events.</li>
-  <li><b>Transport</b>: play / pause / step ± / scrub bar / speed (1–1000 events/s) / jump to phase.</li>
-  <li><b>Sources</b>: open a <code>.trace.jsonl</code> (replay) or connect to <code>/api/live</code> (SSE, live).</li>
-  <li><b>Race mode</b>: several solvers on the same maze, side by side, stepped in lockstep.</li>
-  <li><b>Counters panel</b>: nodes expanded, frontier size, steps and revisits, updated per event.</li>
-  <li><b>Results tab</b> (phase 3): charts from benchmark JSONL, click a row to replay that trial.</li>
-</ul>
+<header class="top">
+  <h1>MazeRunner</h1>
+  <nav id="tabs" role="tablist" aria-label="Views">
+    <button role="tab" data-tab="run" aria-selected="true">Run</button>
+    <button role="tab" data-tab="race" aria-selected="false">Race</button>
+    <button role="tab" data-tab="traces" aria-selected="false">Traces</button>
+    <button role="tab" data-tab="results" aria-selected="false">Results</button>
+  </nav>
+  <div class="help-wrap">
+    <button id="help-btn" aria-expanded="false" aria-controls="help" title="Keyboard shortcuts">? Help</button>
+    <div id="help" class="popover" hidden role="dialog" aria-label="Keyboard shortcuts">
+      <h3>Keyboard shortcuts</h3>
+      <dl>
+        <dt><kbd>Space</kbd></dt><dd>play / pause</dd>
+        <dt><kbd>&larr;</kbd> <kbd>&rarr;</kbd></dt><dd>step back / forward (hold <kbd>Shift</kbd> for 100)</dd>
+        <dt><kbd>[</kbd> <kbd>]</kbd></dt><dd>previous / next phase</dd>
+        <dt><kbd>-</kbd> <kbd>+</kbd></dt><dd>slower / faster</dd>
+        <dt><kbd>Home</kbd></dt><dd>restart</dd>
+        <dt><kbd>End</kbd></dt><dd>jump to end</dd>
+        <dt><kbd>?</kbd></dt><dd>toggle this help</dd>
+      </dl>
+    </div>
+  </div>
+</header>
+<div id="banner" class="banner" role="alert" hidden></div>
+<main>
+  <section id="view-run" class="view" role="tabpanel"></section>
+  <section id="view-race" class="view" role="tabpanel" hidden></section>
+  <section id="view-traces" class="view" role="tabpanel" hidden></section>
+  <section id="view-results" class="view" role="tabpanel" hidden></section>
+</main>
+<script type="module" src="app.js"></script>
 </body>
 </html>

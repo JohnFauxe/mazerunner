@@ -1,0 +1,29 @@
+# Tiny matrix for quick end-to-end runs: mazerunner bench --config benchmarks/configs/smoke.toml
+seed = 1
+trials = 2
+warmup = 0
+repeats = 2
+braid = [0.0]
+
+generators = ["recursive-backtracker", "binary-tree", "sidewinder", "aldous-broder", "wilson", "prim-simplified"]
+solvers = ["bfs", "dfs", "astar", "wall-follower", "tremaux"]
+
+[[topology]]
+name = "square"
+sizes = [[5, 5], [12, 12]]
+
+[[topology]]
+name = "polar"
+sizes = [[3]]
+
+[[topology]]
+name = "hex"
+sizes = [[4, 4]]
+
+[endpoints]
+placement = "opposite-sides"
+
+[trace]
+record = true
+sample = 1
+dir = "traces"   # relative to the results file's directory

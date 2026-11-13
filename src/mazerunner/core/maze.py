@@ -40,13 +40,15 @@ class Maze:
         self.tracer.emit("uncarve", a, b)
 
     def link_all(self) -> None:
-        """Open every adjacency (start state for wall-adding generators). Not traced."""
+        """Open every adjacency (start state for wall-adding generators).
+        Traced as a single "open_all" event."""
         for c in self.topology.cells():
             for n in self.topology.neighbors(c):
                 if n not in self._adj[c]:
                     self._adj[c].add(n)
                     self._adj[n].add(c)
                     self._n_links += 1
+        self.tracer.emit("open_all")
 
     # --- queries (solvers / metrics) ------------------------------------
     def linked(self, a: Cell, b: Cell) -> bool:

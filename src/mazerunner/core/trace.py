@@ -11,7 +11,8 @@ captured on a separate run of the same seed, so viewing never skews results.
 Hot loops may guard expensive argument building with `if tracer.enabled:`.
 
 Event vocabulary (the viewer ignores unknown ops):
-  generation : carve, uncarve, wall (alias of uncarve for wall-adders), current,
+  generation : open_all (no cells: every adjacency linked; wall-adders start here),
+               carve, uncarve, wall (alias of uncarve for wall-adders), current,
                frontier_add, frontier_remove, walk (random-walk step),
                erase (loop erasure; cells), set_merge (cells), phase {"label"}
   placement  : endpoints [start, goal]
