@@ -29,8 +29,10 @@ Wire format (.trace.jsonl and live SSE share it):
 
 from __future__ import annotations
 
+import gzip
 import json
 import time
+from pathlib import Path
 from collections.abc import Callable
 from typing import IO, Any
 
@@ -96,6 +98,45 @@ class StreamTracer(_Encoding):
         self.sink(self.encode(op, cells, data))
         if self.delay:
             time.sleep(self.delay)
+
+
+TRACE_SUFFIXES = (".trace.jsonl.gz", ".trace.jsonl")
+
+
+def is_trace_name(name: str) -> bool:
+    return name.endswith(TRACE_SUFFIXES)
+
+
+def open_trace(path, mode: str = "rt") -> IO[str]:
+    """Open a trace for text reading/writing; `.gz` paths are gzip-compressed."""
+    p = Path(path)
+    if p.suffix == ".gz":
+        return gzip.open(p, mode, encoding="utf-8")
+    return open(p, mode.replace("t", ""), encoding="utf-8")
+
+
+def fill_geometry(header: dict) -> dict:
+    """Traces may omit `geometry` (it is large and fully determined by the
+    topology). Rebuild it from header["topology"] = {"name", "args"} when missing."""
+    if not header.get("geometry"):
+        from mazerunner.core.registry import load_all, topologies
+        load_all()
+        t = header["topology"]
+        name, args = (t["name"], t.get("args", [])) if isinstance(t, dict) else (t, header.get("args", []))
+        header["geometry"] = topologies.get(name).obj(*args).geometry()
+    return header
+
+
+def load_trace(path) -> tuple[dict, list[list], dict | None]:
+    """Read a .trace.jsonl or .trace.jsonl.gz file; header geometry is always filled in."""
+    with open_trace(path) as fp:
+        header, events, footer = read_trace(fp)
+    return fill_geometry(header), events, footer
+
+
+def read_trace_header(path) -> dict:
+    with open_trace(path) as fp:
+        return json.loads(fp.readline())
 
 
 def read_trace(fp: IO[str]) -> tuple[dict, list[list], dict | None]:

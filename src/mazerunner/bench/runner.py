@@ -53,7 +53,7 @@ def _peak(fn) -> int:
 
 def trace_name(t: Trial) -> str:
     return (f"{t.topology}-{'x'.join(map(str, t.size))}-{t.generator}-{t.solver}"
-            f"-b{t.braid}-t{t.trial}.trace.jsonl")
+            f"-b{t.braid}-t{t.trial}.trace.jsonl.gz")
 
 
 def _resolve_trace_dir(settings: RunSettings, out_path: Path | None) -> tuple[Path, Path | None]:

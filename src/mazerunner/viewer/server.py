@@ -29,7 +29,8 @@ from urllib.parse import parse_qs, unquote, urlparse
 from mazerunner import api
 from mazerunner.core.endpoints import Placement
 from mazerunner.core.registry import generators, solvers, topologies
-from mazerunner.core.trace import Recorder, StreamTracer, read_trace
+from mazerunner.core.trace import (Recorder, StreamTracer, is_trace_name, load_trace,
+                                   read_trace_header)
 
 STATIC = Path(__file__).parent / "static"
 MAX_CELLS = 40_000
@@ -160,9 +161,9 @@ def _summary(header: dict) -> dict:
             "seed": header.get("seed")}
 
 
-def _safe_name(name: str, suffix: str) -> str:
+def _safe_name(name: str, *suffixes: str) -> str:
     name = unquote(name)
-    if not NAME_RE.match(name) or ".." in name or not name.endswith(suffix):
+    if not NAME_RE.match(name) or ".." in name or not name.endswith(suffixes):
         raise FileNotFoundError(name)
     return name
 
@@ -263,12 +264,11 @@ class Handler(BaseHTTPRequestHandler):
                         out.append(item)
             return self._json(out)
         if path.startswith("/api/traces/"):
-            name = _safe_name(path[len("/api/traces/"):], ".trace.jsonl")
+            name = _safe_name(path[len("/api/traces/"):], ".trace.jsonl", ".trace.jsonl.gz")
             f = next((d / name for d in srv.trace_dirs() if (d / name).is_file()), None)
             if f is None:
                 raise FileNotFoundError(name)
-            with open(f) as fp:
-                h, ev, ft = read_trace(fp)
+            h, ev, ft = load_trace(f)
             return self._json({"header": h, "events": ev, "footer": ft})
         if path == "/api/results":
             out = []
@@ -299,12 +299,11 @@ class Handler(BaseHTTPRequestHandler):
     def _list_traces(d: Path) -> list:
         out = []
         if d.is_dir():
-            for f in sorted(d.glob("*.trace.jsonl")):
+            for f in sorted(p for p in d.iterdir() if is_trace_name(p.name)):
                 st = f.stat()
                 item = {"name": f.name, "size": st.st_size, "mtime": st.st_mtime}
                 try:
-                    with open(f) as fp:
-                        item.update(_summary(json.loads(fp.readline())))
+                    item.update(_summary(read_trace_header(f)))
                 except (ValueError, OSError):
                     pass
                 out.append(item)

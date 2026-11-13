@@ -16,7 +16,7 @@ from mazerunner.core.maze import Maze
 from mazerunner.core.registry import generators, load_all, solvers, topologies
 from mazerunner.core.rng import derive_seed
 from mazerunner.core.topology import Topology
-from mazerunner.core.trace import NULL, Recorder, Tracer
+from mazerunner.core.trace import NULL, Recorder, Tracer, open_trace
 
 load_all()
 
@@ -71,11 +71,17 @@ def trace_header(topology: Topology, **extra) -> dict:
 
 
 def record(topology: str, size, generator: str, solver: str | None, seed: int, out: Path, *,
-           gen_params=None, solver_params=None, endpoints=None, braid: float = 0.0) -> Path:
-    """Run once with a Recorder and write a replayable .trace.jsonl."""
+           gen_params=None, solver_params=None, endpoints=None, braid: float = 0.0,
+           embed_geometry: bool = False) -> Path:
+    """Run once with a Recorder and write a replayable trace (.trace.jsonl, or
+    gzip-compressed .trace.jsonl.gz). Geometry is omitted by default: readers
+    rebuild it from the topology (core.trace.load_trace), which keeps files small."""
     topo = make_topology(topology, size)
-    rec = Recorder(topo.index, trace_header(topo, generator=generator, solver=solver, seed=seed,
-                                            braid=braid, endpoints=endpoints or {}))
+    header = trace_header(topo, generator=generator, solver=solver, seed=seed,
+                          braid=braid, endpoints=endpoints or {})
+    if not embed_geometry:
+        header["geometry"] = None
+    rec = Recorder(topo.index, header)
     maze = generate(topo, generator, seed, params=gen_params, endpoints=endpoints,
                     braid=braid, tracer=rec)
     footer = {"maze": {"links": maze.n_links, "start": topo.index[maze.start],
@@ -86,6 +92,6 @@ def record(topology: str, size, generator: str, solver: str | None, seed: int, o
                             "counters": r.counters, "optimal": maze.shortest_path_length()}
     rec.footer = footer
     out.parent.mkdir(parents=True, exist_ok=True)
-    with open(out, "w") as fp:
+    with open_trace(out, "wt") as fp:
         rec.dump(fp)
     return out

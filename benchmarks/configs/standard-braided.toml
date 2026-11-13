@@ -1,0 +1,45 @@
+# Braided benchmark: 20x20 and 50x50 mazes with loops (braid 0.5). Wall followers and Pledge can fail here.
+#   uv run mazerunner bench benchmarks/configs/standard-braided.toml --out results/standard-braided.jsonl
+# Polar has no width×height size, so its rings are chosen to give a similar cell count:
+#   12 rings = 379 cells (≈ 20×20 = 400);  28 rings = 2,395 cells (≈ 50×50 = 2,500).
+seed = 20261113
+trials = 5           # distinct mazes per (topology, size, generator)
+warmup = 1
+repeats = 3          # timed runs per measurement; the median is reported
+braid = [0.5]        # half of all dead ends removed, which creates loops
+# idastar is left out: with loops and no visited set it re-explores exponentially (1–5 s per solve at 50×50).
+
+generators = [
+  "recursive-backtracker", "binary-tree", "sidewinder", "aldous-broder", "wilson",
+  "ab-wilson-hybrid", "hunt-and-kill", "prim-simplified", "prim-true", "kruskal",
+  "growing-tree", "eller", "recursive-division",
+]  # cellular-automaton is left out: its mazes aren't guaranteed to connect start and goal
+solvers = [
+  "bfs", "dfs", "dijkstra", "astar", "greedy", "bidirectional-bfs", "dead-end-filling",
+  "jps", "wall-follower", "tremaux", "chain",
+]
+# Also left out as long-running / timing out (2026-11-13 run, 50x50):
+#   random-mouse 5–6 ms per solve, timed out on 5–11% of runs
+#   pledge       63–76 ms per solve on square/hex, reached the goal in only 8–33% of runs
+
+[[topology]]
+name = "square"
+sizes = [[20, 20], [50, 50]]
+
+[[topology]]
+name = "hex"
+sizes = [[20, 20], [50, 50]]
+
+[[topology]]
+name = "polar"
+sizes = [[12], [28]]
+
+[endpoints]
+placement = "opposite-sides"
+
+[trace]
+# One replay per combination (trial 0), viewable from the Results tab. Stored gzip-compressed
+# without geometry (rebuilt on load): ~0.1 MB per 50x50 replay.
+record = true
+sample = 1
+dir = "traces"

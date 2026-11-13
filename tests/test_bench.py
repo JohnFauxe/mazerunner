@@ -130,8 +130,12 @@ def test_run_end_to_end_resume_report(tmp_path):
     for r in traced:
         p = out.parent / r["trace"]
         assert r["trace"].startswith("traces/") and p.exists()
-        first = json.loads(p.read_text().splitlines()[0])
-        assert first["type"] == "header"
+        assert r["trace"].endswith(".trace.jsonl.gz")
+        from mazerunner.core.trace import load_trace, read_trace_header
+        first = read_trace_header(p)
+        assert first["type"] == "header" and first["geometry"] is None  # stored without geometry
+        header, events, _ = load_trace(p)
+        assert header["geometry"]["cells"] and events  # rebuilt on load
     # resumable
     run_config(cfg_path, out, progress=False)
     assert len(results.load_trials(out)) == 4

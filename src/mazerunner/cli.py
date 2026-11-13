@@ -150,7 +150,7 @@ def cmd_record(a) -> None:
     from mazerunner import api
     out = Path(a.out) if a.out else Path("traces") / (
         f"{a.topology}-{'x'.join(map(str, _size(a)))}-{a.generator}-{a.solver or 'gen'}"
-        f"-s{a.seed}.trace.jsonl")
+        f"-s{a.seed}.trace.jsonl.gz")
     api.record(a.topology, _size(a), a.generator, a.solver, a.seed, out,
                endpoints=_endpoints(a), braid=a.braid)
     print(f"wrote {out}\n  replay: mazerunner replay {out}  (or --web)")
@@ -176,7 +176,7 @@ def cmd_replay(a) -> None:
         print(f"wrote {a.svg} ({n} frames)")
     elif a.web:
         a.traces = str(trace.parent)
-        _serve(a, "/?" + urllib.parse.urlencode({"trace": trace.name}))
+        _serve(a, "/?" + urllib.parse.urlencode({"trace": trace.name}))  # .trace.jsonl(.gz)
     else:
         from mazerunner.viewer.terminal import play
         play(trace, fps=a.fps, every=a.every)

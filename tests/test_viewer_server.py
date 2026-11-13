@@ -200,3 +200,13 @@ def test_js_syntax():
         r = subprocess.run(["node", "--input-type=module", "--check"], input=f.read_text(),
                            capture_output=True, text=True)
         assert r.returncode == 0, f"{f}: {r.stderr}"
+
+
+def test_gz_trace_without_geometry_is_served_with_geometry(srv):
+    from mazerunner import api
+    out = srv.tmp / "traces" / "g.trace.jsonl.gz"
+    api.record("square", (4, 4), "_v-dfs", "_v-bfs", 3, out)
+    names = [t["name"] for t in get_json(srv, "/api/traces")]
+    assert "g.trace.jsonl.gz" in names
+    d = get_json(srv, "/api/traces/g.trace.jsonl.gz")
+    assert len(d["header"]["geometry"]["cells"]) == 16 and d["events"]

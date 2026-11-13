@@ -5,7 +5,7 @@ from __future__ import annotations
 import sys
 import time
 
-from mazerunner.core.trace import read_trace
+from mazerunner.core.trace import load_trace
 from mazerunner.render.animate import new_state, replay_states
 from mazerunner.render.ascii import draw_grid
 
@@ -62,8 +62,7 @@ def frame_text(state: dict, rows: int, cols: int, *, step: int | None = None,
 
 def play(trace_path, *, fps: float = 30.0, every: int = 1, out=None, sleep=time.sleep) -> None:
     out = sys.stdout if out is None else out
-    with open(trace_path, encoding="utf-8") as fp:
-        header, events, _ = read_trace(fp)
+    header, events, _ = load_trace(trace_path)
     topo = header.get("topology")
     name = topo.get("name") if isinstance(topo, dict) else topo
     args = topo.get("args", []) if isinstance(topo, dict) else header.get("args", [])

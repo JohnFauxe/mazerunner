@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Iterable, Iterator
 from pathlib import Path
 
-from mazerunner.core.trace import read_trace
+from mazerunner.core.trace import load_trace
 from mazerunner.render import svg as _svg
 
 
@@ -164,8 +164,7 @@ def to_svg_frames(header: dict, events: list[list], every: int = 1, *,
 def write_animated_svg(trace_path, out_path, fps: float = 15.0, every: int = 1, *,
                        cell_size: float = 12.0, max_frames: int = 300) -> int:
     """Write one self-contained looping SMIL-animated SVG. Returns frame count."""
-    with open(trace_path, encoding="utf-8") as fp:
-        header, events, _ = read_trace(fp)
+    header, events, _ = load_trace(trace_path)
     geom, centers = _geometry(header)
     snaps = _sample(events, every, max_frames) or [new_state()]
     n = len(snaps)
