@@ -190,6 +190,17 @@ export class Player {
     if (dir > 0) { const n = ph.find((p) => p.idx + 1 > this.pos && p.idx >= this.pos); this.seek(n ? n.idx + 1 : this.total); }
     else { const prev = [...ph].reverse().find((p) => p.idx + 1 < this.pos); this.seek(prev ? prev.idx + 1 : 0); }
   }
+  solveStart() { // event index of the first "solve" phase (same in every race lane), or -1
+    const p = this.phases().find((x) => String(x.label).startsWith('solve'));
+    return p ? p.idx : -1;
+  }
+  skipToSolve() { // jump past generation; keeps playing if it was playing
+    const i = this.solveStart();
+    if (i < 0 || this.pos > i) return false;
+    this.following = false; this.last = 0;
+    this.seek(i + 1);
+    return true;
+  }
   touch() { this.dirty = true; if (!this.raf) this.raf = requestAnimationFrame(this._loop); }
   frame(t) {
     this.raf = 0;

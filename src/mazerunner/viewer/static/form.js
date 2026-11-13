@@ -4,7 +4,7 @@ import { el } from './watch.js';
 const SIZE_LABELS = { square: ['rows', 'cols'], hex: ['rows', 'cols'], polar: ['rings'] };
 
 export class RunForm {
-  // opts.multi: solvers as checkboxes (max 4) instead of a single select
+  // opts.multi: solvers as checkboxes (any number) instead of a single select
   constructor(catalog, { multi = false, live = false } = {}) {
     this.cat = catalog; this.multi = multi;
     const C = this.c = {};
@@ -20,7 +20,7 @@ export class RunForm {
     for (const g of catalog.generators) C.generator.append(el('option', { value: g.key }, g.title));
     C.generator.addEventListener('change', () => { this.syncGenInfo(); });
     if (multi) {
-      C.solvers = el('div', { class: 'checks', role: 'group', 'aria-label': 'Solvers (up to 4)' });
+      C.solvers = el('div', { class: 'checks', role: 'group', 'aria-label': 'Solvers' });
       this.checks = new Map();
       for (const s of catalog.solvers) {
         const cb = el('input', { type: 'checkbox', value: s.key });
@@ -48,7 +48,7 @@ export class RunForm {
     const f = (label, ...kids) => el('div', { class: 'field' }, el('span', {}, label), ...kids);
     this.form = el('div', { class: 'form' },
       f('Topology', C.topology), f('Size', C.sizeBox), f('Generator', C.generator, this.genInfo),
-      f(multi ? 'Solvers (pick up to 4)' : 'Solver', C.solvers),
+      f(multi ? 'Solvers' : 'Solver', ...(multi ? [this.solverTools(), C.solvers] : [C.solvers])),
       f('Endpoints', C.placement, el('div', { class: 'row' }, 'side', C.side, 'along', C.along)),
       f('Braid (remove dead ends)', el('div', { class: 'row' }, C.braid, C.braidLbl)),
       f('Seed', el('div', { class: 'row' }, C.seed, C.dice)),
@@ -95,8 +95,25 @@ export class RunForm {
     this.genInfo.textContent = g && g.tags.length ? g.tags.join(', ') : '';
   }
   limitChecks() {
-    const on = [...this.checks.values()].filter((x) => x.cb.checked).length;
-    for (const { cb, info } of this.checks.values()) if (!cb.checked) cb.disabled = on >= 4 || !!this.reason(info);
+    for (const { cb, info } of this.checks.values()) {
+      cb.disabled = !!this.reason(info);
+      if (cb.disabled) cb.checked = false;
+    }
+    if (this.countEl) {
+      const n = [...this.checks.values()].filter((x) => x.cb.checked).length;
+      this.countEl.textContent = `${n} selected`;
+    }
+  }
+  solverTools() {
+    const pick = (on) => () => {
+      for (const { cb } of this.checks.values()) if (!cb.disabled) cb.checked = on;
+      this.limitChecks();
+    };
+    this.countEl = el('small', { class: 'muted' });
+    return el('div', { class: 'row' },
+      el('button', { type: 'button', onclick: pick(true) }, 'All compatible'),
+      el('button', { type: 'button', onclick: pick(false) }, 'None'),
+      this.countEl);
   }
   solverKeys() {
     if (this.override) return this.override;
