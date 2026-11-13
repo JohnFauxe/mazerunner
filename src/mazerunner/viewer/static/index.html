@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MazeRunner Viewer</title>
+<style>
+  :root { --bg:#fafaf8; --fg:#1d1d1b; --muted:#6b6b66; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#161615; --fg:#ecebe6; --muted:#9a9993; } }
+  body { margin:0; padding:16px; font:15px/1.5 system-ui, sans-serif; background:var(--bg); color:var(--fg); }
+  .muted { color:var(--muted); }
+</style>
+</head>
+<body>
+<h1>MazeRunner Viewer</h1>
+<p class="muted">Placeholder (phase 2). Planned layout:</p>
+<ul>
+  <li><b>Canvas</b>: draws cells from <code>header.geometry</code> (square, polar arcs, hex, …) and applies events.</li>
+  <li><b>Transport</b>: play / pause / step ± / scrub bar / speed (1–1000 events/s) / jump to phase.</li>
+  <li><b>Sources</b>: open a <code>.trace.jsonl</code> (replay) or connect to <code>/api/live</code> (SSE, live).</li>
+  <li><b>Race mode</b>: several solvers on the same maze, side by side, stepped in lockstep.</li>
+  <li><b>Counters panel</b>: nodes expanded, frontier size, steps and revisits, updated per event.</li>
+  <li><b>Results tab</b> (phase 3): charts from benchmark JSONL, click a row to replay that trial.</li>
+</ul>
+</body>
+</html>

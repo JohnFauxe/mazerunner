@@ -1,0 +1,45 @@
+# Benchmark matrix (PLAN §4). Incompatible topology/algorithm pairs are skipped automatically.
+seed = 20261113
+trials = 10          # distinct mazes per (topology, size, generator, braid)
+warmup = 1
+repeats = 5
+braid = [0.0]        # later: [0.0, 0.5, 1.0]
+
+generators = [
+  "recursive-backtracker", "binary-tree", "sidewinder", "aldous-broder", "wilson",
+  "hunt-and-kill", "prim-simplified", "kruskal", "growing-tree", "eller", "recursive-division",
+]
+solvers = [
+  "bfs", "dfs", "dijkstra", "astar", "greedy", "bidirectional-bfs", "dead-end-filling",
+  "wall-follower", "random-mouse", "tremaux", "pledge",
+]
+
+[[topology]]
+name = "square"
+sizes = [[10, 10], [50, 50], [200, 200]]
+
+[[topology]]
+name = "polar"
+sizes = [[8], [25], [60]]
+
+[[topology]]
+name = "hex"
+sizes = [[10, 10], [50, 50], [150, 150]]
+
+# Start/goal placement, chosen at generation time. See src/mazerunner/core/endpoints.py
+[endpoints]
+placement = "opposite-sides"  # opposite-sides | corners | diameter | center-out | random | manual
+along = "center"              # center | random: position along the chosen side
+side = 0.0                    # which pair of sides as a boundary fraction (square: 0.0 W→E, 0.25 N→S)
+
+# Planned (phase 4): weighted cells
+# [weights]
+# source = "random"
+# lo = 1
+# hi = 9
+
+# Tracing for replay. Timed runs are never traced; this records a separate run.
+[trace]
+record = false
+sample = 1                    # record trial index < sample for each combination
+dir = "traces"
