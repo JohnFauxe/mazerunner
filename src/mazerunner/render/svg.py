@@ -9,11 +9,11 @@ from xml.sax.saxutils import escape
 from mazerunner.core.maze import Maze
 
 STYLE = """
-svg{color:#222;--mr-wall:currentColor;--mr-start:#43a047;--mr-goal:#e53935;--mr-path:#1e88e5;
+svg{color:#222;--mr-wall:currentColor;--mr-start:#16a34a;--mr-goal:#e53935;--mr-path:#0057ff;
 --mr-cur:#fb8c00;--mr-fr:#26c6da;--mr-vis:#c5cae9;--mr-fill:#bdbdbd;--mr-mark:#ab47bc;--mr-walk:#ffd54f}
 @media (prefers-color-scheme:dark){svg{color:#e6e6e6;--mr-vis:#3949ab;--mr-fill:#616161;--mr-walk:#8d6e00}}
 .w{fill:none;stroke:var(--mr-wall,currentColor);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.p{fill:none;stroke:var(--mr-path,#1e88e5);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+.p{fill:none;stroke:var(--mr-path,#0057ff);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
 """.strip()
 
 
@@ -42,7 +42,7 @@ def draw(geom: dict, linked: Callable[[int, int], bool], centers: list[tuple[flo
     for i, col in (fills or {}).items():
         layers.setdefault(col, []).append(i)
     if start is not None:
-        layers.setdefault("var(--mr-start,#43a047)", []).append(start)
+        layers.setdefault("var(--mr-start,#16a34a)", []).append(start)
     if goal is not None:
         layers.setdefault("var(--mr-goal,#e53935)", []).append(goal)
     cells = geom["cells"]
