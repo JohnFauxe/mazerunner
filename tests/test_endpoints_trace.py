@@ -16,6 +16,8 @@ class Ring(Topology):
     def neighbors(self, c) -> Sequence: return [(c - 1) % self.n, (c + 1) % self.n]
     def __len__(self): return self.n
     def boundary(self): return list(range(self.n))
+    def position(self, c): return (float(c), 0.0)
+    def geometry(self): return {"width": self.n, "height": 1, "cells": [], "walls": []}
 
 
 def test_opposite_sides_is_half_perimeter_apart():
@@ -40,7 +42,8 @@ def test_random_along_is_seeded():
 
 
 def test_link_emits_carve_events():
-    rec = Recorder()
-    m = Maze(Ring(4), tracer=rec)
+    t = Ring(4)
+    rec = Recorder(t.index)
+    m = Maze(t, tracer=rec)
     m.link(0, 1)
-    assert rec.events[0][1:3] == ("carve", (0, 1))
+    assert rec.events[0] == [0, "carve", [0, 1]]

@@ -32,7 +32,8 @@ class Solver(ABC):
 
     def __init__(self, **params) -> None:
         self.params = params
-        self.tracer: Tracer = NULL  # set by runner/viewer; emit visit/frontier_add/…
+        self.tracer: Tracer = NULL  # set by mazerunner.api; emit visit/frontier_add/…
+        self.counters: dict[str, int] = {}
 
 
 class OmniscientSolver(Solver):

@@ -51,18 +51,28 @@ def opposite_sides(boundary: list[Cell], *, side: float = 0.0, along: str = "cen
 
 def place(maze: Maze, placement: Placement | str = DEFAULT, rng: random.Random | None = None,
           **opts) -> None:
-    """Set maze.start / maze.goal. Run after carving (DIAMETER needs the links)."""
+    """Set maze.start / maze.goal. Run after carving (DIAMETER needs the links).
+    opts: side, along (opposite-sides), side (center-out goal), start/goal (manual)."""
     p = Placement(placement)
     topo = maze.topology
     if p is Placement.OPPOSITE_SIDES:
-        maze.start, maze.goal = opposite_sides(topo.boundary(), rng=rng, **opts)
+        maze.start, maze.goal = opposite_sides(
+            topo.boundary(), side=opts.get("side", 0.0), along=opts.get("along", "center"), rng=rng)
     elif p is Placement.CORNERS:
         maze.start, maze.goal = topo.default_endpoints()
     elif p is Placement.MANUAL:
-        maze.start, maze.goal = tuple(opts["start"]), tuple(opts["goal"])
+        def cell(v):
+            return tuple(v) if isinstance(v, list) else v
+        maze.start, maze.goal = cell(opts["start"]), cell(opts["goal"])
     elif p is Placement.RANDOM:
         a, b = (rng or random.Random()).sample(list(topo.cells()), 2)
         maze.start, maze.goal = a, b
-    else:  # DIAMETER, CENTER_OUT
-        raise NotImplementedError(f"placement {p.value}: phase 1/2")
-    maze.meta["endpoints"] = {"placement": p.value, **{k: v for k, v in opts.items()}}
+    elif p is Placement.DIAMETER:
+        from mazerunner.metrics.structure import diameter
+        _, maze.start, maze.goal = diameter(maze)
+    elif p is Placement.CENTER_OUT:
+        b = topo.boundary()
+        maze.start = topo.center()
+        maze.goal = b[int(opts.get("side", 0.0) * len(b)) % len(b)]
+    maze.meta["endpoints"] = {"placement": p.value, **opts}
+    maze.tracer.emit("endpoints", maze.start, maze.goal)

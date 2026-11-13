@@ -10,13 +10,19 @@ def degree_histogram(maze: Maze) -> Counter:
 
 
 def dead_end_ratio(maze: Maze) -> float:
-    h = degree_histogram(maze)
+    h = degree_histogram(maze)  # noqa: E501
     return h.get(1, 0) / max(1, len(maze.topology))
 
 
 def diameter(maze: Maze) -> tuple[int, object, object]:
-    """Longest shortest path (two BFS sweeps; exact on trees). Phase 1."""
-    raise NotImplementedError
+    """(length, a, b) of the longest shortest path. Two BFS sweeps: exact on
+    trees (perfect mazes), a lower bound on braided mazes."""
+    first = maze.topology.cell_list[0]
+    d0 = maze.bfs_distances(first)
+    a = max(d0, key=d0.get)
+    d1 = maze.bfs_distances(a)
+    b = max(d1, key=d1.get)
+    return d1[b], a, b
 
 
 def mean_corridor_length(maze: Maze) -> float:
